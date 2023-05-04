@@ -2,57 +2,74 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "Header.h"
+
+//Funzione per la lettura del file input e scrittura del file output
+void read_n_print(){
+    
+    int limit = width;  //Caratteri rimanenti in una riga
+    char *line = (char*) malloc(width * sizeof(char));
+    bool endp = false;  //Variabile che indica la fine di un paragrafo
+
+    while (!feof(fin)) {
+
+        //Scorro il file fino alla fine di una nuova parola
+        int i;
+        for (i = 0; fscanf(fin, "%c", &line[i]) != 0; i++){          
+            if (line[i] == ' ' || line[i] == '\n')                  
+                break;                                                  
+        }
+
+        //Se c'è spazio la inserisco nella riga 
+        if ((limit - strlen(line)) > 0){                
+            if(line[i] == '\n'){
+                limit = width;
+            } else if (limit - strlen(line) == 0) {
+                line[i] = '\n';
+                limit = width;
+            }
+        } 
+        //Altrimenti vado a capo e la inserisco nella riga dopo.
+        else {
+            fputs("\n",fout);
+            limit = width - strlen(line);
+        }
+        for (i = 0; i < strlen(line); i++){          
+            printf("%c",line[i]);
+            if (line[i] == '\0')                  
+                break;
+            else
+                fprintf(fout,"%c",line[i]);                                         
+        }
+    }
+
+    //Chiusura dei file
+    fclose(fin);
+    fclose(fout);
+}
 
 
 int main(){
 
-    //Dichiarazione e inizializzazione parametri e file
-    int dist, width, lines, columns, line_l;
-    FILE *fin, *fout;
-
+    //Inizializzazione parametri e file
     fin = fopen("input.txt", "r");
     fout = fopen("output.txt", "w");
 
     printf("Inserire i parametri e premere invio:\n");
 
     printf("Righe di ogni colonna:\n");
-    scanf("%d", lines);
+    scanf("%d", &lines);
 
     printf("Caratteri per ogni colonna:\n");
-    scanf("%d", width);
+    scanf("%d", &width);
 
     printf("Numero massimo di colonne per pagina:\n");
-    scanf("%d", columns);
+    scanf("%d", &columns);
 
     printf("Distanza tra ogni colonna:\n");
-    scanf("%d", dist);
+    scanf("%d", &dist);
 
+    read_n_print();
 
-    //Lettura del file dato in input
-    char line[width];
-    bool endp = false;
-
-    while (!feof(fin)) {
-        
-        //Se la riga prima era l'ultima di un paragrafo salta una riga altrimenti procedi con la lettura
-        if (endp) {
-            fputs("\n",fout);
-            endp = false;
-        }
-        else {
-            fgets(line,width,fin);
-            line_l=strlen(line);
-            if (line[line_l-1]=='\n'){
-                if (line[line_l-2]=='\n'){
-                    endp = true;
-                }
-                line[line_l-1]='\0';
-            }
-            if (line[line_l-1]!='\n')
-                line[line_l-1]='\n';
-
-            fputs(line,fout);
-        }
-    }
-
+    return 0;
 }
