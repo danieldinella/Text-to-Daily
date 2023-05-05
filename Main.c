@@ -8,10 +8,10 @@
 void read_n_print(){
     
     int limit = width;  //Caratteri rimanenti in una riga
-    char *line = (char*) malloc(width * sizeof(char));
-    bool endp = false;  //Variabile che indica la fine di un paragrafo
-
+    
     while (!feof(fin)) {
+
+        char *line = (char*) malloc(width * sizeof(char));  //Alloco memoria per la nuova parola
 
         //Scorro il file fino alla fine di una nuova parola
         int i;
@@ -21,26 +21,30 @@ void read_n_print(){
         }
 
         //Se c'è spazio la inserisco nella riga 
-        if ((limit - strlen(line)) > 0){                
-            if(line[i] == '\n'){
-                limit = width;
-            } else if (limit - strlen(line) == 0) {
-                line[i] = '\n';
+        if ((limit - (int)strlen(line)) > 0){
+            if (line[i] == '\n'){                
                 limit = width;
             }
-        } 
+        } else if (limit - (int)strlen(line) == 0) {
+                line[i] = '\n';
+                limit = width;
+        }
         //Altrimenti vado a capo e la inserisco nella riga dopo.
         else {
-            fputs("\n",fout);
-            limit = width - strlen(line);
+            if (line[i] != '\n')
+                fputs("\n",fout);
+            limit = width;
         }
-        for (i = 0; i < strlen(line); i++){          
-            printf("%c",line[i]);
+        limit -= (int)strlen(line);
+        for (i = 0; i < (int)strlen(line); i++){
             if (line[i] == '\0')                  
                 break;
             else
                 fprintf(fout,"%c",line[i]);                                         
         }
+
+        free(line);     //Libero la memoria della parola
+
     }
 
     //Chiusura dei file
@@ -57,16 +61,16 @@ int main(){
 
     printf("Inserire i parametri e premere invio:\n");
 
-    printf("Righe di ogni colonna:\n");
+    printf("Righe di ogni colonna: ");
     scanf("%d", &lines);
 
-    printf("Caratteri per ogni colonna:\n");
+    printf("Caratteri per ogni colonna: ");
     scanf("%d", &width);
 
-    printf("Numero massimo di colonne per pagina:\n");
+    printf("Numero massimo di colonne per pagina: ");
     scanf("%d", &columns);
 
-    printf("Distanza tra ogni colonna:\n");
+    printf("Distanza tra ogni colonna: ");
     scanf("%d", &dist);
 
     read_n_print();
