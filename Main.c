@@ -4,62 +4,52 @@
 #include <stdbool.h>
 #include "Header.h"
 
-//Funzione per la lettura del file input e scrittura del file output
-void read_n_print(){
-    
-    int limit = width;  //Caratteri rimanenti in una riga
-    
-    while (!feof(fin)) {
+// Funzione per la lettura del file input e scrittura del file output
+void read_n_print()
+{
 
-        char *line = (char*) malloc(width * sizeof(char));  //Alloco memoria per la nuova parola
+    /*
+    int length = 0;     // Lunghezza della nuova parola scansionata
+    int limit = width;  // Caratteri rimanenti in una riga
+    char last = "\0";   // Ultima parola scansionata troppo lunga per la riga    
+    */
 
-        //Scorro il file fino alla fine di una nuova parola
-        int i;
-        for (i = 0; fscanf(fin, "%c", &line[i]) != 0; i++){          
-            if (line[i] == ' ' || line[i] == '\n')                  
-                break;                                                  
+    while (!feof(fin))
+    {
+
+        char **line = (char **)malloc(width * sizeof(char *)); // Alloco la memoria per la nuova riga
+        int i = 0;
+
+        while (true)
+        {
+            line[i] = new_word();
+            i++;
         }
 
-        //Se c'è spazio la inserisco nella riga 
-        if ((limit - (int)strlen(line)) > 0){
-            if (line[i] == '\n'){                
-                limit = width;
-            }
-        } else if (limit - (int)strlen(line) == 0) {
-                line[i] = '\n';
-                limit = width;
-        }
-        //Altrimenti vado a capo e la inserisco nella riga dopo.
-        else {
-            if (line[i] != '\n')
-                fputs("\n",fout);
-            limit = width;
-        }
-        limit -= (int)strlen(line);
-        for (i = 0; i < (int)strlen(line); i++){
-            if (line[i] == '\0')                  
+        //Scrivo la riga sul file
+        for (int j = 0; j < (int)strlen(line[i]); j++){
+            if (line[i][j] == '\0')
                 break;
             else
-                fprintf(fout,"%c",line[i]);                                         
+                fprintf(fout, "%c", line[i][j]);
         }
 
-        free(line);     //Libero la memoria della parola
-
+        free(line); // Libero la memoria della riga
     }
 
-    //Chiusura dei file
+    // Chiusura dei file
     fclose(fin);
     fclose(fout);
 }
 
+int main()
+{
 
-int main(){
-
-    //Inizializzazione parametri e file
+    // Inizializzazione parametri e file
     fin = fopen("input.txt", "r");
     fout = fopen("output.txt", "w");
 
-    printf("Inserire i parametri e premere invio:\n");
+    printf("Inserire j parametri e premere invio:\n");
 
     printf("Righe di ogni colonna: ");
     scanf("%d", &lines);
