@@ -8,30 +8,44 @@
 void read_n_print()
 {
 
-    /*
-    int length = 0;     // Lunghezza della nuova parola scansionata
-    int limit = width;  // Caratteri rimanenti in una riga
-    char last = "\0";   // Ultima parola scansionata troppo lunga per la riga    
-    */
+    int limit;  // Caratteri rimanenti in una riga
 
     while (!feof(fin))
     {
 
         char **line = (char **)malloc(width * sizeof(char *)); // Alloco la memoria per la nuova riga
         int i = 0;
+        limit = width;
 
         while (true)
         {
             line[i] = new_word();
+
+            //Se l'ultima parola scansionata non entra nella riga resetto l'ultima operazione
+            if (limit < (int)strlen(line[i])-1){
+                fseek(fin,-(int)strlen(line[i]),SEEK_CUR);
+                i--;
+                break;
+            }
+
+            limit -= (int)strlen(line[i]);
+            
+            if (feof(fin))
+                break;
+            
+            //Se l'ultima parola scansionata termina a capo allora interrompo la scansione
+            if (line[i][(int)strlen(line[i])-1] == '\n'){
+                break;
+            }
+
             i++;
         }
 
+        justify(line, limit, i);
+
         //Scrivo la riga sul file
-        for (int j = 0; j < (int)strlen(line[i]); j++){
-            if (line[i][j] == '\0')
-                break;
-            else
-                fprintf(fout, "%c", line[i][j]);
+        for (int j = 0; j <= i; j++){
+            fprintf(fout, "%s", line[j]);
         }
 
         free(line); // Libero la memoria della riga
