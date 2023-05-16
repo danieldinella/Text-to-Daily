@@ -9,32 +9,33 @@ void read_n_print()
 {
 
     int limit;  // Caratteri rimanenti in una riga
+    
 
     while (!feof(fin))
     {
-
         char **line = (char **)malloc(width * sizeof(char *)); // Alloco la memoria per la nuova riga
-        int i = 0;
+        int i = 0;  // Contatore alle parole
         limit = width;
 
         while (true)
         {
             line[i] = new_word();
+            int length = my_strlen(line[i]);    // Lunghezza delle parole
 
-            //Se l'ultima parola scansionata non entra nella riga resetto l'ultima operazione
-            if (limit < (int)strlen(line[i])-1){
-                fseek(fin,-(int)strlen(line[i]),SEEK_CUR);
+            // Se l'ultima parola scansionata non entra nella riga resetto l'ultima operazione
+            if (limit < length-1){
+                fseek(fin,-strlen(line[i]),SEEK_CUR);
                 i--;
                 break;
             }
 
-            limit -= (int)strlen(line[i]);
+            limit -= length;
             
             if (feof(fin))
                 break;
             
-            //Se l'ultima parola scansionata termina a capo allora interrompo la scansione
-            if (line[i][(int)strlen(line[i])-1] == '\n'){
+            // Se l'ultima parola scansionata termina a capo allora interrompo la scansione
+            if (line[i][length-1] == '\n'){
                 break;
             }
 
@@ -58,7 +59,6 @@ void read_n_print()
 
 int main()
 {
-
     // Inizializzazione parametri e file
     fin = fopen("input.txt", "r");
     fout = fopen("output.txt", "w");
