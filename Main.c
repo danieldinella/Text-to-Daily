@@ -7,8 +7,9 @@
 // Funzione per la lettura del file input e scrittura del file output
 void read_n_print()
 {
-    page = (char ***)malloc(height * sizeof(char *));
-    offset = (int *)malloc(height*sizeof(int *));
+    //Sezione dedicata alla lettura
+    page = (char ***)malloc(height * sizeof(char *));   // Puntatore alla pagina
+    offset = (int *)malloc(height*sizeof(int *));   // Array che conta il numero di parole inserito in ogni riga
     while(!feof(fin)){
         for(int k = 0; k < height; k++)
         {
@@ -17,7 +18,7 @@ void read_n_print()
 
             if (isFirstColumn){
                 page[k] = (char **)malloc(columns*(width+dist)*sizeof(char *)); // Alloco la memoria per la nuova riga
-                offset[k] = 0;
+                offset[k] = 0;  // Setto il contatore di parole per la riga
             } else {
                 set_new_column(page[k],k);
             }
@@ -26,12 +27,22 @@ void read_n_print()
         isFirstColumn = false;
     }
 
+    // Sezione dedicata alla stampa
     bool end;
     for (int k = 0; k < height; k++){
         end = false;
+        
+        if (page[k] == NULL)
+            break;
+
         for (int j = 0; end == false; j++){
+            
+            if (page[k][j]== NULL)
+                break;
+
             if (page[k][j][my_strlen(page[k][j])-1] == '\n')
                 end = true;
+        
             fprintf(fout,"%s",page[k][j]);
         }
     }
