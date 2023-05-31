@@ -11,8 +11,13 @@ FILE *fin, *fout;
 
 // Funzione per la lettura di una nuova parola
 void new_word(char *word){
-    //Scorro il file fino alla fine di una nuova parola
-    for (int j = 0; !feof(fin) && fscanf(fin, "%c", &word[j]) != 0; j++){          
+    // Scorro il file fino alla fine di una nuova parola
+    for (int j = 0; !feof(fin) && fscanf(fin, "%c", &word[j]) != 0; j++){ 
+        // Se la parola inizia con uno spazio non la considero    
+        if  (word[j] == ' ' && j == 0){
+            j--;
+            continue;
+        }
         if (word[j] == ' ' || word[j] == '\n')                  
             break;
     }
@@ -37,9 +42,16 @@ int my_strlen(char *word){
 
 // Funzione per inserire gli spazi necessari per giustificare ogni riga
 void justify(char **line, int hlimit, int i, int k){
+    // Creo una variabile d'appoggio per ottenere il prossimo carattere
+    char x = '\0';
+    if(!feof(fin)){
+        x = fgetc(fin);
+        fseek(fin,-sizeof(char),SEEK_CUR);
+    }
 
-    // Se nella riga c'è solo una parola inserisco gli spazi per facilitare gli incolonnamenti successivi
-    if (i == 0){
+    /* Se il prossimo carattere è \n o c'è solo una parola nella riga
+    allora inserisco tutti gli spazi necessari a completare la riga */
+    if(( x == '\n') || i == 0){
         line[offset[k]][strlen(line[offset[k]])-1] = ' ';
         if (hlimit >= 0){ 
             while (hlimit >= 0){
@@ -47,20 +59,7 @@ void justify(char **line, int hlimit, int i, int k){
                 hlimit--;
             }
         }
-    }
-
-    // Se nella riga ci sono due parole e l'ultima è un accapo allora si tratta di un fine paragrafo
-    else if (line[offset[k]] == "\n" && i == 1){
-        line[offset[k]-1][strlen(line[offset[k]-1])-1] = ' ';
-        if (hlimit >= 0){ 
-            while (hlimit >= 0){
-                strcat(line[offset[k]-1]," ");
-                hlimit--;
-            }
-        }
-    }
-    
-    else {
+    } else {
         //Calcolo gli spazi che vanno inseriti tra ogni parola
         int spaces = hlimit/i;
 
@@ -82,9 +81,10 @@ void justify(char **line, int hlimit, int i, int k){
             }
         }
     }
-
+    
     //Setto l'ultimo carattere dell'ultima parola come a capo
-    line[offset[k]][strlen(line[offset[k]])-1] = '\n';
+    strcat(line[offset[k]],"\n");
+    
     return;
 }
 
@@ -110,7 +110,7 @@ void new_line(char **line, int k){
         wlimit -= length;
             
         // Se il file è finito o l'ultima parola scansionata termina a capo allora interrompo la scansione
-        if (feof(fin) || line[offset[k]][length-1] == '\n'){
+        if (feof(fin) || line[offset[k]][(int)strlen(line[offset[k]])-1] == '\n'){
             break;
         }
 
@@ -124,6 +124,7 @@ void new_line(char **line, int k){
 
 // Funzione per distanziare correttamente le nuove colonne
 void set_new_column(char **line,int k){
+    // Setto l'ultimo carattere della riga a \0 e da li aggiungo gli spazi richiesti da input
     page[k][offset[k]][(int)strlen(page[k][offset[k]])-1] = '\0';
     page[k][offset[k]+1] = (char *)malloc(width*sizeof(char *));
     for (int j = 0; j < dist; j++){

@@ -28,20 +28,15 @@ void read_n_print()
     }
 
     // Sezione dedicata alla stampa
-    bool end;
     for (int k = 0; k < height; k++){
-        end = false;
         
         if (page[k] == NULL)
             break;
 
-        for (int j = 0; end == false; j++){
+        for (int j = 0; j <= offset[k]; j++){
             
             if (page[k][j]== NULL)
                 break;
-
-            if (page[k][j][my_strlen(page[k][j])-1] == '\n')
-                end = true;
         
             fprintf(fout,"%s",page[k][j]);
         }
