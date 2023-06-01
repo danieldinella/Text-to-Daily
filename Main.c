@@ -10,13 +10,14 @@ void read_n_print()
     //Sezione dedicata alla lettura
     page = (char ***)malloc(height * sizeof(char *));   // Puntatore alla pagina
     offset = (int *)malloc(height*sizeof(int *));   // Array che conta il numero di parole inserito in ogni riga
-    while(!feof(fin)){
+    for (int c = 0; c < columns; c++) {
+        if(feof(fin))
+            break;
         for(int k = 0; k < height; k++)
         {
             if(feof(fin))
                 break;
-
-            if (isFirstColumn){
+            if (c == 0){
                 page[k] = (char **)malloc(columns*(width+dist)*sizeof(char *)); // Alloco la memoria per la nuova riga
                 offset[k] = 0;  // Setto il contatore di parole per la riga
             } else {
@@ -24,8 +25,8 @@ void read_n_print()
             }
             new_line(page[k],k);
         }
-        isFirstColumn = false;
     }
+
 
     // Sezione dedicata alla stampa
     for (int k = 0; k < height; k++){
@@ -41,14 +42,14 @@ void read_n_print()
             fprintf(fout,"%s",page[k][j]);
         }
     }
-
+    return;
 }
 
 int main()
 {
     // Inizializzazione parametri e file
     fin = fopen("input.txt", "r");
-    fout = fopen("output.txt", "w");
+    fout = fopen("output.txt","w");
 
     printf("Inserire i parametri e premere invio:\n");
 
@@ -64,7 +65,12 @@ int main()
     printf("Distanza tra ogni colonna: ");
     scanf("%d", &dist);
 
-    read_n_print();
+    while(!feof(fin)){
+        read_n_print();
+        if (!feof(fin)){
+            fprintf(fout,"%s","\n\n%%%\n\n");
+        }
+    }
 
     // Chiusura dei file
     fclose(fin);
