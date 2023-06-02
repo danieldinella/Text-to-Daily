@@ -23,7 +23,7 @@ void read_n_print()
             } else {
                 set_new_column(page[k],k);
             }
-            new_line(page[k],k);
+            new_line(page[k],k,c);
         }
     }
 

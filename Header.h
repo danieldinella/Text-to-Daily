@@ -41,7 +41,7 @@ int my_strlen(char *word){
 }
 
 // Funzione per inserire gli spazi necessari per giustificare ogni riga
-void justify(char **line, int hlimit, int i, int k){
+void justify(char **line, int hlimit, int i, int k, int c){
     // Creo una variabile d'appoggio per ottenere il prossimo carattere
     char x = fgetc(fin);
     if(!feof(fin)){
@@ -80,14 +80,14 @@ void justify(char **line, int hlimit, int i, int k){
     }
     
     //Setto l'ultimo carattere dell'ultima parola come a capo
-    if(k+1 != height && !feof(fin))
+    if(k+1 != height && (!feof(fin) || c != 0))
         strcat(line[offset[k]],"\n");
     
     return;
 }
 
 // Funzione per la lettura di una nuova riga
-void new_line(char **line, int k){
+void new_line(char **line, int k, int c){
     wlimit = width;
     int i = 0;  // Contatore delle parole nella riga che fanno parte solo di questa colonna
     while (true)
@@ -116,7 +116,7 @@ void new_line(char **line, int k){
         i++;
     }
 
-    justify(line, wlimit, i, k);
+    justify(line, wlimit, i, k, c);
     return;
 }
 
