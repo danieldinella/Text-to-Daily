@@ -2,11 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
-int dist, width, height, columns, wlimit;
-char ***page;
-int *offset;
-FILE *fin, *fout;
+FILE    *fin, *fout;
+int     dist, width, height, columns, wlimit, readPipe[2], printPipe[2];
+char    ***page;
+int     *tot_offset;
 
 // Funzione per la lettura di una nuova parola
 void new_word(char *word){
@@ -41,94 +44,100 @@ int my_strlen(char *word){
 }
 
 // Funzione per inserire gli spazi necessari per giustificare ogni riga
-void justify(char **line, int hlimit, int i, int k, int c){
+void add_space(char **line, int offset, int h, int c){
     // Creo una variabile d'appoggio per ottenere il prossimo carattere
     char x = fgetc(fin);
     if(!feof(fin)){
         fseek(fin,-sizeof(char),SEEK_CUR);
     }
-
-    if(line[offset[k]][strlen(line[offset[k]])-1] == '\n' || line[offset[k]][strlen(line[offset[k]])-1] == ' ')
-        line[offset[k]][strlen(line[offset[k]])-1] = '\0';
-
+    if(line[offset][(int)strlen(line[offset])-1] == '\n' || line[offset][(int)strlen(line[offset])-1] == ' '){
+        line[offset][(int)strlen(line[offset])-1] = '\0';
+    }  else {
+        wlimit--;
+    }
     /* Se il prossimo carattere è \n o c'è solo una parola nella riga
     allora inserisco tutti gli spazi necessari a completare la riga */
-    if(( x == '\n') || i == 0){
-        while (hlimit >= 0){
-            strcat(line[offset[k]]," ");
-            hlimit--;
+    if(( x == '\n') || offset == 0){
+        while (wlimit >= 0){
+            strcat(line[offset]," ");
+            wlimit--;
         }
     } else {
         //Calcolo gli spazi che vanno inseriti tra ogni parola
-        int spaces = hlimit/i;
+        int spaces = wlimit/offset;
 
         //Inserisco tra le parole il numero di spazi calcolato
         if (spaces > 0){
-            for (int j = offset[k]-i; j < offset[k]; j++){
+            for (int j = 0; j < offset; j++){
                 for (int s = 0; s < spaces; s++){
                     strcat(line[j]," ");
-                    hlimit--;
+                    wlimit--;
                 }
             }
         }
 
         //Se c'è ancora spazio inserisco altri spazi fino a esaurimento
-        for (int j = offset[k]-i; hlimit >= 0; j++){
+        for (int j = 0; wlimit >= 0; j++){
                 strcat(line[j]," ");
-                hlimit--;
+                wlimit--;
         }
     }
     
     //Setto l'ultimo carattere dell'ultima parola come a capo
-    if(k+1 != height && (!feof(fin) || c != 0))
-        strcat(line[offset[k]],"\n");
-    
+    if(h+1 != height && (!feof(fin) || c != 0)){
+        strcat(line[offset],"\n");
+        printf("A CAPO: %s\n",line[offset]);
+    }
     return;
 }
 
 // Funzione per la lettura di una nuova riga
-void new_line(char **line, int k, int c){
+void new_line(char **line, int *offset){
     wlimit = width;
-    int i = 0;  // Contatore delle parole nella riga che fanno parte solo di questa colonna
     while (true)
     {
         // Ottengo la nuova parola e la sua lunghezza in caratteri
-        line[offset[k]] = (char *)malloc(width * sizeof(char *));
-        new_word(line[offset[k]]);
-        int length = my_strlen(line[offset[k]]);
+        line[*offset] = (char *)malloc(width * sizeof(char *));
+        new_word(line[*offset]);
+        int length = my_strlen(line[*offset]);
 
         // Se l'ultima parola scansionata non entra nella riga resetto l'ultima operazione
         if (wlimit < length-1){
-            fseek(fin,-strlen(line[offset[k]]),SEEK_CUR);
-            offset[k]--;
-            i--;
+            fseek(fin,-strlen(line[*offset]),SEEK_CUR);
+            *offset-=1;
             break;
         }
 
         wlimit -= length;
             
         // Se il file è finito o l'ultima parola scansionata termina a capo allora interrompo la scansione
-        if (feof(fin) || line[offset[k]][(int)strlen(line[offset[k]])-1] == '\n'){
+        if (feof(fin) || line[*offset][(int)strlen(line[*offset])-1] == '\n'){
             break;
         }
 
-        offset[k]++;
-        i++;
+        *offset+=1;
     }
 
-    justify(line, wlimit, i, k, c);
     return;
 }
 
 // Funzione per distanziare correttamente le nuove colonne
-void set_new_column(char **line,int k){
+void set_new_column(char **line, int h, int offset){
+
+    printf("Processo justify tot_offset: %d\n",tot_offset[h]);
     // Setto l'ultimo carattere della riga a \0 e da li aggiungo gli spazi richiesti da input
-    if (k+1 != height)
-        page[k][offset[k]][(int)strlen(page[k][offset[k]])-1] = '\0';
-    page[k][offset[k]+1] = (char *)malloc(width*sizeof(char *));
-    for (int j = 0; j < dist; j++){
-        strcat(page[k][offset[k]+1]," ");
+    if (h+1 != height){
+        page[h][tot_offset[h]][(int)strlen(page[h][tot_offset[h]])-1] = '\0';
     }
-    offset[k]+=2; 
+    printf("\nLUNGHEZZA: %d\n",(int)strlen(page[h][tot_offset[h]]));
+    for (int j = 0; j < dist; j++){
+        strcat(page[h][tot_offset[h]]," ");
+    }
+    printf("\nLUNGHEZZA: %d\n",(int)strlen(page[h][tot_offset[h]]));
+    // Inserisco la nuova riga
+    for(int i = 0; i <= offset; i++){
+        tot_offset[h]++;
+        page[h][tot_offset[h]] = line[i];
+    } 
     return;
 }
