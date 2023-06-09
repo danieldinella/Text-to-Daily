@@ -134,7 +134,6 @@ void print_txt(){
     return;
 }
 
-
 int main()
 {
     // Inizializzazione parametri, file e pipe

@@ -96,7 +96,7 @@ void add_space(char **line, int offset, int h, int c){
     }
     
     //Setto l'ultimo carattere dell'ultima parola come a capo
-    if(h+1 != height && (!feof(fin) || c != 0)){
+    if(h+1 < height && (!feof(fin) || c != 0)){
         strcat(line[offset],"\n");
     }
     return;

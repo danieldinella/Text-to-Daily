@@ -1,6 +1,5 @@
 CC = gcc
 CFLAGS = -Wall -Wextra
-LDFLAGS =
 
 SRCS = Main.c
 OBJS = $(SRCS:.c=.o)
@@ -12,7 +11,7 @@ TARGET = Text-to-daily
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CC) $^ -o $@
 
 %.o: %.c $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
