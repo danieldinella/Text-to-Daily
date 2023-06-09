@@ -6,12 +6,15 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-FILE    *fin, *fout;
-int     dist, width, height, columns, wlimit, readPipe[2], printPipe[2];
-char    ***page;
-int     *tot_offset;
+int     dist, width, height, columns;   // Parametri di ingresso iniziali 
+int     readPipe[2], printPipe[2];      // Pipe per i processi
+FILE    *fin, *fout;    // File d'ingresso e d'uscita
+int     wlimit;         // Caratteri rimanenti che entrano nella riga in questione 
+char    ***page;        // Puntatore alle righe
+int     *tot_offset;    // Array di contatori di parole delle linee
 
-// Funzione per la lettura di una nuova parola
+/* Funzione per la lettura di una nuova parola
+   Input: puntatore a stringa su cui caricare la parola*/
 void new_word(char *word){
     int j;
     // Scorro il file fino alla fine di una nuova parola
@@ -27,7 +30,9 @@ void new_word(char *word){
     return;
 }
 
-// Funzione per ottenere la lunghezza di una parola in caratteri e non in byte
+/* Funzione per ottenere la lunghezza di una parola in caratteri e non in byte
+   Input: puntatore a stringa di cui misurare la lunghezza
+   Output: lunghezza della parola calcolata in caratteri*/
 int my_strlen(char *word){
 
     int length = 0;
@@ -43,18 +48,25 @@ int my_strlen(char *word){
     return length;
 }
 
-// Funzione per inserire gli spazi necessari per giustificare ogni riga
+/* Funzione per inserire gli spazi necessari per giustificare ogni riga
+   Input: puntatore di puntatori a stringhe in cui inserire gli spazi,
+          numero di stringhe contenute nella riga,
+          numero della riga,
+          numero della colonna*/
 void add_space(char **line, int offset, int h, int c){
     // Creo una variabile d'appoggio per ottenere il prossimo carattere
     char x = fgetc(fin);
     if(!feof(fin)){
         fseek(fin,-sizeof(char),SEEK_CUR);
     }
+
+    // Setto l'ultimo a carattere a NULL solo se non mi trovo alla fine del file altrimenti diminuisco wlimit
     if(line[offset][(int)strlen(line[offset])-1] == '\n' || line[offset][(int)strlen(line[offset])-1] == ' '){
         line[offset][(int)strlen(line[offset])-1] = '\0';
     }  else {
         wlimit--;
     }
+
     /* Se il prossimo carattere è \n o c'è solo una parola nella riga
     allora inserisco tutti gli spazi necessari a completare la riga */
     if(( x == '\n') || offset == 0){
@@ -86,7 +98,6 @@ void add_space(char **line, int offset, int h, int c){
     //Setto l'ultimo carattere dell'ultima parola come a capo
     if(h+1 != height && (!feof(fin) || c != 0)){
         strcat(line[offset],"\n");
-        printf("A CAPO: %s\n",line[offset]);
     }
     return;
 }
@@ -121,19 +132,20 @@ void new_line(char **line, int *offset){
     return;
 }
 
-// Funzione per distanziare correttamente le nuove colonne
+/* Funzione per distanziare correttamente le nuove colonne
+   Input: la riga della nuova colonna da aggiungere alla riga preesistente,
+          numero della riga
+          numero di stringhe contenute nella nuova riga*/
 void set_new_column(char **line, int h, int offset){
 
-    printf("Processo justify tot_offset: %d\n",tot_offset[h]);
     // Setto l'ultimo carattere della riga a \0 e da li aggiungo gli spazi richiesti da input
     if (h+1 != height){
         page[h][tot_offset[h]][(int)strlen(page[h][tot_offset[h]])-1] = '\0';
     }
-    printf("\nLUNGHEZZA: %d\n",(int)strlen(page[h][tot_offset[h]]));
     for (int j = 0; j < dist; j++){
         strcat(page[h][tot_offset[h]]," ");
     }
-    printf("\nLUNGHEZZA: %d\n",(int)strlen(page[h][tot_offset[h]]));
+
     // Inserisco la nuova riga
     for(int i = 0; i <= offset; i++){
         tot_offset[h]++;
