@@ -1,20 +1,14 @@
 CC = gcc
 CFLAGS = -Wall -Wextra
 
-SRCS = Main.c
-OBJS = $(SRCS:.c=.o)
-HEADER = Header.h
-TARGET = Text-to-daily
+all: Multi Mono
 
-.PHONY: all clean
+Multi: MainMulti.c HeaderMulti.h
+	$(CC) $(CFLAGS) MainMulti.c HeaderMulti.h -o Multi
 
-all: $(TARGET)
-
-$(TARGET): $(OBJS)
-	$(CC) $^ -o $@
-
-%.o: %.c $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@
+Mono: MainMono.c HeaderMono.h
+	$(CC) $(CFLAGS) MainMono.c HeaderMono.h -o Mono
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f Multi Mono
+
