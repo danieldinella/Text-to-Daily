@@ -1,24 +1,19 @@
 # Text-to-daily
 
-## Descrizione
+## Description
+Text-to-daily is a command-line program that converts plain text into justified text in a daily-like format.
 
-Text-to-daily è un programma da riga di comando che converte un testo normale in un testo giustificato nel formato di un quotidiano.
+## Requirements
+1. Make sure you have a C compiler installed on your system.
 
-## Requisiti
+2. Ensure that you have a file named "input.txt" in the same folder as the program, containing the text to be processed.
 
-1. Assicurarsi di avere un compilatore C installato nel sistema.
+## Usage
+1. Compile the program by running the make command.
 
-2. Assicurarsi di avere un file chiamato "input.txt" nella stessa cartella del programma, contenente il testo da elaborare.
+2. Execution:
+	- Single-process Version: Use the command ./Mono.
+	- Multi-process Version: Use the command ./Multi.
+	- Follow the on-screen instructions to provide the required parameters. It is recommended to choose a column width that is not smaller than the length of the longest word in the input text.
 
-
-## Utilizzo
-
-1. Compilare il programma eseguendo il comando make.
-
-2. Esecuzione:
-	-Versione Monoprocesso: Utilizzare il comando ./Mono.
-	-Versione Multiprocesso: Utilizzare sil comando ./Multi.
-
-3. Seguire le istruzioni visualizzate a schermo per fornire i parametri richiesti. Si raccomanda di scegliere una larghezza della colonna che non sia inferiore alla lunghezza della parola più lunga presente nel testo di input.
-
-4. Il programma elaborerà il testo e genererà un file di output chiamato "output.txt" contenente il testo giustificato nel formato di un quotidiano.
+3. The program will process the text and generate an output file named "output.txt" containing the justified text in a newspaper-like format.
